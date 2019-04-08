@@ -1,68 +1,144 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-## Available Scripts
+# how to get a good React Map up...
 
-In the project directory, you can run:
+Put the following packages in your package.json
 
-### `npm start`
+```
+ "@mapbox/mapbox-gl-draw": "^1.1.1",
+    "mapbox-gl": "^0.53.1",
+    "react-mapbox-gl": "3.9.1",
+    "react-mapbox-gl-draw": "^1.0.6",
 
-Runs the app in the development mode.<br>
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+```
 
-The page will reload if you make edits.<br>
-You will also see any lint errors in the console.
+`yarn install`
 
-### `npm test`
+1. import the packages and declare your `Map` component:
 
-Launches the test runner in the interactive watch mode.<br>
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+```
 
-### `npm run build`
+import ReactMapboxGl from 'react-mapbox-gl';
+import DrawControl from 'react-mapbox-gl-draw';
+import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
 
-Builds the app for production to the `build` folder.<br>
-It correctly bundles React in production mode and optimizes the build for the best performance.
+...
+...
 
-The build is minified and the filenames include the hashes.<br>
-Your app is ready to be deployed!
+const Map = ReactMapboxGl({
+  accessToken: "pk.eyJ1dgioiwngonoidgn3094673746843" <-- get a new api token for mapbox here: https://account.mapbox.com/access-tokens/
+});
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```
 
-### `npm run eject`
+2. create the map component in your container:
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+```
+    <div>
+        <Map
+            style="mapbox://styles/mapbox/streets-v9" // eslint-disable-line
+            containerStyle={{
+            height: '100vh',
+            width: '100vw'
+            }}
+        >
+    </div>
+```
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+3. Within the <Map /> add the <DrawControl /> feature:
 
-Instead, it will copy all the configuration files and the transitive dependencies (Webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+```
+        <Map
+          style="mapbox://styles/mapbox/streets-v9" // eslint-disable-line
+          containerStyle={{
+            height: '100vh',
+            width: '100vw'
+          }}
+        >
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+        <DrawControl
+            position="top-left"
+            onDrawCreate={this.onDrawCreate}
+            onDrawUpdate={this.onDrawUpdate}
+          />
+        </Map>
+```
 
-## Learn More
+4. add the handlers to your class/function for the returned geojson info:
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+```
+    ...
+  onDrawCreate = ({ features }) => {
+    console.log(features);
+  };
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+  onDrawUpdate = ({ features }) => {
+    console.log({ features });
+  };
 
-### Code Splitting
+  render() {
+    return (...
+```
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/code-splitting
+5. Now add SearchBox functionality:
 
-### Analyzing the Bundle Size
+add a geocoder.js file
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size
+```
+import { createElement, Component } from 'react';
+import { Map } from 'mapbox-gl';
+import PropTypes from 'prop-types';
+import { accessToken } from './token';
+import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
+import * as MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
 
-### Making a Progressive Web App
+class Geocoder extends Component {
+  static contextTypes = { map: PropTypes.object.isRequired };
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app
+  context: {
+    map: Map;
+  };
 
-### Advanced Configuration
+  componentDidMount() {
+    const { map } = this.context;
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/advanced-configuration
+    map.addControl(
+      new MapboxGeocoder({
+        accessToken
+      })
+    );
+  }
 
-### Deployment
+  render() {
+    return null;
+  }
+}
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/deployment
+export default Geocoder;
+```
 
-### `npm run build` fails to minify
+6. import it `import Geocoder from './geocoder';`
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
+7. nest it in <Map />
+
+```
+      ...
+      ...
+      <Geocoder />
+    </Map>
+  </div>
+```
+
+8. Boom. We have polygons and search functionality. 
+
+Other Useful bits:
+
+in App.css:
+```
+  .mapboxgl-canvas {
+    position: relative !important;
+  }
+```
+
+this stops map from not covering entire page.
+
+

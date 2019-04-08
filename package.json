@@ -1,10 +1,15 @@
 {
-  "name": "react-mapbox-gl",
+  "name": "react-mapbox-gl-boilerplate",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@mapbox/mapbox-gl-draw": "^1.1.1",
+    "@mapbox/mapbox-gl-geocoder": "^3.1.6",
+    "mapbox-gl": "^0.53.1",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
+    "react-mapbox-gl": "3.9.1",
+    "react-mapbox-gl-draw": "^1.0.6",
     "react-scripts": "2.1.8"
   },
   "scripts": {
